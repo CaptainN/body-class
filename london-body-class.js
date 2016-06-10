@@ -34,38 +34,41 @@ results in `<body class="alpha">`
 
 by: @olizilla for meteor-london
 */
-var prevSingleton
+var prevSingleton;
 
 Blaze.addBodyClass = function (fn) {
   if($.isArray(fn)) {
-    return fn.forEach(Blaze.addBodyClass)
+    return fn.forEach(Blaze.addBodyClass);
   }
   if(typeof fn !== 'function') {
-    $('body').removeClass(prevSingleton)
-    return Meteor.startup(function () { $('body').addClass(prevSingleton = fn) })
+    $('body').removeClass(prevSingleton);
+    return Meteor.startup(function () { $('body').addClass(prevSingleton = fn); });
   }
 
   Meteor.startup(function () {
     Tracker.autorun(function () {
       $('body')
         .removeClass(fn._prev)
-        .addClass(fn._prev = fn())
-    })
-  })
+        .addClass(fn._prev = fn());
+    });
+  });
 }
+
 if(Package['iron:router']) {
   Meteor.startup(function () {
     Blaze.addBodyClass(function () {
-      return Router.current() && Router.current().route.getName()
-    })
-  })
+      return (Router.current() && Router.current().route) ? Router.current().route.getName() : "noRouteNameFound";
+    });
+  });
 }
+
 if(Package['meteorhacks:flow-router'] || Package['kadira:flow-router']) {
   Meteor.startup(function () {
     // Since we need to wait for startup, we need to addBodyClass immediately, as the entry page will already have rendered
-    Blaze.addBodyClass(FlowRouter.getRouteName())
+    Blaze.addBodyClass(FlowRouter.getRouteName());
     FlowRouter.triggers.enter([function (context) {
-      Blaze.addBodyClass(context.route.name)
-    }])
-  })
+      Blaze.addBodyClass(context.route.name);
+    }]);
+
+  });
 }
